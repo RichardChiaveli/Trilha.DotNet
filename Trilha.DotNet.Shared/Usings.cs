@@ -44,6 +44,7 @@ global using System.Net.Mail;
 global using System.Net.Mime;
 global using System.Net.WebSockets;
 global using System.Reflection;
+global using System.Security.Authentication;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text;
