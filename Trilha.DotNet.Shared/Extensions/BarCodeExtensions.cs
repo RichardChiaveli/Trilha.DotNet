@@ -23,7 +23,7 @@ public static class BarCodeExtensions
 
         image.Save(memoryStream, new PngEncoder
         {
-            IgnoreMetadata = true
+            SkipMetadata = true
         });
         var byteArray = memoryStream.ToArray();
         return byteArray.Length > 0 ? Convert.ToBase64String(byteArray) : string.Empty;

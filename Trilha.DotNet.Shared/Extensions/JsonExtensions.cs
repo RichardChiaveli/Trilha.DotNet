@@ -2,17 +2,19 @@
 
 public static class JsonExtensions
 {
-    private static readonly JsonSerializerOptions Options = new()
+    public static JsonSerializerOptions Options(this JsonSerializerOptions options)
     {
-        WriteIndented = false,
-        AllowTrailingCommas = false,
-        PropertyNameCaseInsensitive = true,
-        NumberHandling = JsonNumberHandling.Strict,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+        options.WriteIndented = false;
+        options.AllowTrailingCommas = false;
+        options.PropertyNameCaseInsensitive = true;
+        options.NumberHandling = JsonNumberHandling.Strict;
+        options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        
+        return options;
+    }
 
     /// <summary>
     /// https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation
@@ -37,25 +39,26 @@ public static class JsonExtensions
         JsonSerializer.Serialize(input, typeof(TInput), serializerContext);
 
     public static string Stringify<TInput>(this TInput input)
-        => JsonSerializer.Serialize(input, Options);
+        => JsonSerializer.Serialize(input, new JsonSerializerOptions().Options());
 
     public static TConvert Deserialize<TConvert, TJsonSerializerContext>(this string input, TJsonSerializerContext serializerContext)
         where TJsonSerializerContext : JsonSerializerContext
     {
-        var typeInfoResolver = Options.TypeInfoResolver;
-        Options.TypeInfoResolver = serializerContext;
+        var options = new JsonSerializerOptions().Options();
+        var typeInfoResolver = options.TypeInfoResolver;
+        options.TypeInfoResolver = serializerContext;
 
-        var result = JsonSerializer.Deserialize<TConvert>(input, Options)!;
-        Options.TypeInfoResolver = typeInfoResolver;
+        var result = JsonSerializer.Deserialize<TConvert>(input, options)!;
+        options.TypeInfoResolver = typeInfoResolver;
 
         return result;
     }
 
     public static TConvert Deserialize<TConvert>(this string input)
-        => JsonSerializer.Deserialize<TConvert>(input, Options)!;
+        => JsonSerializer.Deserialize<TConvert>(input, new JsonSerializerOptions().Options())!;
 
     public static TConvert Deserialize<TConvert>(this byte[] input)
-        => JsonSerializer.Deserialize<TConvert>(input, Options)!;
+        => JsonSerializer.Deserialize<TConvert>(input, new JsonSerializerOptions().Options())!;
 
     public static string Minify(this string input)
         => Regex.Replace(input, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1",

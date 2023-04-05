@@ -1,0 +1,28 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.DependencyInjection;
+using System.IO.Compression;
+using System.Net.Mime;
+
+namespace Trilha.DotNet.DependencyResolver
+{
+    public static class ResponseCompressionResolver
+    {
+        public static IServiceCollection AddBrotliCompression(this IServiceCollection services)
+        {
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] {MediaTypeNames.Application.Json});
+            })
+            .Configure<BrotliCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
+
+            return services;
+        }
+    }
+}

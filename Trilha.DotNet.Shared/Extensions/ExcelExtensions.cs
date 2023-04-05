@@ -79,7 +79,7 @@ public static class ExcelExtensions
         {
             var values = (from col in columns
                           let json = (JObject)JToken.FromObject(row!)
-                          select !string.IsNullOrWhiteSpace(json[col.Key]?.ToString()) ? json[col.Key!].ToString().Trim() : string.Empty).ToArray<object>();
+                          select !string.IsNullOrWhiteSpace(json[col.Key]?.ToString()) ? json[col.Key!]!.ToString().Trim() : string.Empty).ToArray<object>();
 
             dt.Rows.Add(values);
         }
