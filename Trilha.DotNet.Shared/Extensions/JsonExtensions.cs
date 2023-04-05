@@ -54,6 +54,9 @@ public static class JsonExtensions
     public static TConvert Deserialize<TConvert>(this string input)
         => JsonSerializer.Deserialize<TConvert>(input, Options)!;
 
+    public static TConvert Deserialize<TConvert>(this byte[] input)
+        => JsonSerializer.Deserialize<TConvert>(input, Options)!;
+
     public static string Minify(this string input)
         => Regex.Replace(input, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1",
             RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)).Replace("//", string.Empty);
