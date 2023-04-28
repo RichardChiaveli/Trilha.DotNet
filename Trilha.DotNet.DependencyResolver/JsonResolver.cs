@@ -34,7 +34,11 @@ public static class JsonResolver
 
     public static IServiceCollection AddJsonMvc(this IServiceCollection services)
     {
-        services.AddMvc()
+        services
+            .AddControllers(opt =>
+            {
+                opt.AllowEmptyInputInBodyModelBinding = true;
+            })
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Formatting = Formatting.None;
