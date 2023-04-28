@@ -1,16 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-using System.Net.Http.Headers;
+﻿namespace Trilha.DotNet.DependencyResolver;
 
-namespace Trilha.DotNet.DependencyResolver
+public static class HttpClientFactoryResolver
 {
-    public static class HttpClientFactoryResolver
+    public static IServiceCollection AddHttpClientFactory(this IServiceCollection services, IReadOnlyDictionary<string, string> clientSettings)
     {
-        public static IServiceCollection AddHttpClientFactory(this IServiceCollection services, IReadOnlyDictionary<string, string> clientSettings)
+        foreach (var setting in clientSettings)
         {
-            foreach (var setting in clientSettings)
-            {
-                services.AddHttpClient(setting.Key, (_, config) =>
+            services.AddHttpClient(setting.Key, (_, config) =>
                 {
                     if (!string.IsNullOrWhiteSpace(setting.Value))
                         config.BaseAddress = new Uri(setting.Value);
@@ -29,9 +25,8 @@ namespace Trilha.DotNet.DependencyResolver
                     PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
                     MaxConnectionsPerServer = int.MaxValue
                 });
-            }
-
-            return services;
         }
+
+        return services;
     }
 }

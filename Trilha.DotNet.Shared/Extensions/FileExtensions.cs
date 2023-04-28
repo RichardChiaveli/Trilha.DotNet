@@ -40,7 +40,7 @@ public static class FileExtensions
 
         var decompressedBytes = output.ToArray();
         var decompressedString = Encoding.UTF8.GetString(decompressedBytes);
-        return decompressedString.Deserialize<T>();
+        return decompressedString.ParseJson<T>();
     }
 
     public static async Task<string> ShortenedUrl(this string fileUrl, bool removeHttp = true)

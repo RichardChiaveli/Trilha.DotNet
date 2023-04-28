@@ -13,7 +13,7 @@ public class UploadModelComponent<TModel> : IModelBinder
             throw new ArgumentNullException(nameof(bindingContext));
 
         var produtoImagemViewModel = bindingContext.ValueProvider.GetValue("Model").First()
-            .Deserialize<IFormFileJson<TModel>>();
+            .ParseJson<IFormFileJson<TModel>>();
 
         produtoImagemViewModel.Upload = bindingContext.ActionContext.HttpContext.Request.Form.Files;
 

@@ -4,7 +4,7 @@ public static class WebSocketExtensions
 {
     public static async Task SendObjectAsync<T>(this WebSocket socket, T payload)
     {
-        var bytes = Encoding.UTF8.GetBytes(payload.Stringify());
+        var bytes = Encoding.UTF8.GetBytes(payload!.Stringify());
 
         await socket.SendAsync(
             new ArraySegment<byte>(bytes)
@@ -23,7 +23,7 @@ public static class WebSocketExtensions
 
         var value = Encoding.UTF8.GetString(buffer, 0, response.Count);
 
-        return value.Deserialize<T>();
+        return value.ParseJson<T>();
     }
 
     public static async Task CloseAsync(this WebSocket socket)

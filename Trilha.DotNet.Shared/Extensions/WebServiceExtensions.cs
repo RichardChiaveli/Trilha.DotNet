@@ -147,19 +147,19 @@ public static class WebServiceExtensions
     public static async Task<T?> ResponseAsync<T>(this HttpResponseMessage response, bool isJson = true)
     {
         var data = await response.ResponseAsStringAsync();
-        return isJson ? data.Deserialize<T>() : (T)Convert.ChangeType(data, typeof(T));
+        return isJson ? data.ParseJson<T>() : (T)Convert.ChangeType(data, typeof(T));
     }
 
     public static T? Response<T>(this HttpResponseMessage response, bool isJson = true)
         => ResponseAsync<T>(response, isJson).ConfigureAwait(false).GetAwaiter().GetResult();
 
-    public static async Task<JsonDocument> ResponseAsJObjectAsync(this HttpResponseMessage response)
+    public static async Task<JObject> ResponseAsJObjectAsync(this HttpResponseMessage response)
     {
         var data = await response.ResponseAsStringAsync();
-        return JsonDocument.Parse(data);
+        return JObject.Parse(data);
     }
 
-    public static JsonDocument ResponseAsJObject(this HttpResponseMessage response)
+    public static JObject ResponseAsJObject(this HttpResponseMessage response)
         => ResponseAsJObjectAsync(response).ConfigureAwait(false).GetAwaiter().GetResult();
 
     public static async Task<byte[]> ResponseAsByteArrayAsync(this HttpResponseMessage response)
@@ -232,7 +232,7 @@ public static class WebServiceExtensions
 
     public static StringContent FromJsonBody(
         this object? fromBody, string? mediaType = null) =>
-        new(fromBody as string ?? fromBody.Stringify(), Encoding.UTF8, mediaType ?? MediaTypeNames.Application.Json);
+        new(fromBody as string ?? fromBody!.Stringify(), Encoding.UTF8, mediaType ?? MediaTypeNames.Application.Json);
 
     public static MultipartFormDataContent FromFormData(this Dictionary<string, object> fromForm)
     {
