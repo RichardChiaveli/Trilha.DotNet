@@ -4,11 +4,11 @@ public static class JsonResolver
 {
     public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>
     {
-        private const string DateFormat = "yyyy-MM-dd";
+        private const string DateFormat = "dd-MM-yyyy";
 
         public override DateOnly ReadJson(JsonReader reader, Type objectType, DateOnly existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            return DateOnly.ParseExact((string)reader.Value, DateFormat, CultureInfo.InvariantCulture);
+            return DateOnly.ParseExact((string)reader.Value!, DateFormat, CultureInfo.InvariantCulture);
         }
 
         public override void WriteJson(JsonWriter writer, DateOnly value, JsonSerializer serializer)
@@ -19,11 +19,11 @@ public static class JsonResolver
 
     public sealed class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
     {
-        private const string TimeFormat = "HH:mm:ss.FFFFFFF";
+        private const string TimeFormat = "HH:mm";
 
         public override TimeOnly ReadJson(JsonReader reader, Type objectType, TimeOnly existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            return TimeOnly.ParseExact((string)reader.Value, TimeFormat, CultureInfo.InvariantCulture);
+            return TimeOnly.ParseExact((string)reader.Value!, TimeFormat, CultureInfo.InvariantCulture);
         }
 
         public override void WriteJson(JsonWriter writer, TimeOnly value, JsonSerializer serializer)
@@ -35,7 +35,7 @@ public static class JsonResolver
     public static IServiceCollection AddJsonMvc(this IServiceCollection services)
     {
         services.AddMvc()
-            .AddJsonOptions(options =>
+            .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Formatting = Formatting.None;
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
