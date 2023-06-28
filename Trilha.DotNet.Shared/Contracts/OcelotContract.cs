@@ -43,5 +43,5 @@
     /// </summary>
     /// <param name="GlobalConfiguration"></param>
     /// <param name="Routes"></param>
-    public record OcelotConfiguration(OcelotGlobalConfiguration GlobalConfiguration, List<OcelotRoute> Routes);
+    public record OcelotContract(OcelotGlobalConfiguration GlobalConfiguration, List<OcelotRoute> Routes);
 }
