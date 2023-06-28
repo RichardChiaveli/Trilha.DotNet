@@ -18,7 +18,7 @@ public static class TokenExtensions
         , string userPhone
         , string tokenSigning
         , int expirationMilliseconds
-        , IHostingEnvironment environment
+        , IWebHostEnvironment environment
         , string audience = "All"
         , string role = "Default"
         , params KeyValuePair<string, string>[] claims)
@@ -56,7 +56,7 @@ public static class TokenExtensions
     public static bool ValidateJwt(
         this string token
         , string tokenSigning
-        , IHostingEnvironment environment
+        , IWebHostEnvironment environment
         , out IEnumerable<Claim> claims)
     {
         claims = new List<Claim>();

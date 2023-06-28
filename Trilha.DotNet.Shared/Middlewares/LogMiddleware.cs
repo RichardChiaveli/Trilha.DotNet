@@ -56,7 +56,7 @@ public abstract class LogMiddleware
             {"Schema", request.Scheme},
             {"Host", request.Host.Value},
             {"Path", request.Path},
-            {"QueryString", request.QueryString.Value},
+            {"QueryString", request.QueryString.Value ?? string.Empty},
             {"RequestForm", form},
             {"RequestBody", body}
         };
@@ -88,7 +88,7 @@ public abstract class LogMiddleware
             {"Schema", request.Scheme},
             {"Host", request.Host.Value},
             {"Path", request.Path},
-            {"QueryString", request.QueryString.Value},
+            {"QueryString", request.QueryString.Value ?? string.Empty},
             {"ResponseBody", ReadStreamInChunks(newResponseBody)}
         };
     }

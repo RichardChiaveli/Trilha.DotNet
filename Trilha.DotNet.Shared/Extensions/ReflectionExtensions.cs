@@ -47,4 +47,18 @@ public static class ReflectionExtensions
     public static IEnumerable<PropertyInfo> GetSystemProperties(this object argument) =>
         argument.GetType().GetProperties()
             .Where(i => (i.PropertyType.FullName ?? string.Empty).Contains("System"));
+
+    public static void CopyValues<T>(this T target, T source)
+    {
+        var t = typeof(T);
+
+        var properties = t.GetProperties().Where(prop => prop is { CanRead: true, CanWrite: true });
+
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(source, null);
+            if (value != null)
+                prop.SetValue(target, value, null);
+        }
+    }
 }

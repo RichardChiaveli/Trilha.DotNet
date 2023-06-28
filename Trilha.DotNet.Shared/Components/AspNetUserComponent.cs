@@ -10,17 +10,17 @@ public class AspNetUserComponent
     }
 
     public string? Name
-        => _accessor.HttpContext.User.Identity?.Name;
+        => _accessor.HttpContext?.User.Identity?.Name;
 
     public string GetType(string type)
         => (IsAuthenticated() ? _accessor.HttpContext?.User.FindFirst(type)!.Value : string.Empty) ?? string.Empty;
 
     public bool IsAuthenticated()
-        => _accessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+        => _accessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
 
     public bool IsInRole(string role)
-        => _accessor.HttpContext.User.IsInRole(role);
+        => _accessor.HttpContext?.User.IsInRole(role) ?? false;
 
     public IEnumerable<Claim> GetClaimsIdentity()
-        => _accessor.HttpContext.User.Claims;
+        => _accessor.HttpContext?.User.Claims ?? new List<Claim>();
 }
