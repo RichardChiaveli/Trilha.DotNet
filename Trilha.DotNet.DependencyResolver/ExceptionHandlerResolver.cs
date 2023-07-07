@@ -18,8 +18,19 @@ public static class ExceptionHandlerResolver
                     dynamic json = new ExpandoObject();
                     json.Message = "An error occurred whilst processing your request";
 
+                    var error = exceptionHandlerFeature.Error;
+                    var isStatusCodeException = error is StatusCodeException;
+
+                    if (isStatusCodeException)
+                    {
+                        context.Response.StatusCode = (int)((StatusCodeException)error).StatusCode;
+                        json.Message = error.Message;
+                    }
+
                     if (!env.IsProduction())
-                        json.Error = exceptionHandlerFeature.Error;
+                    {
+                        json.Detail = error;
+                    }
 
                     string stringSerializer = JsonConvert.SerializeObject(json);
                     await context.Response.WriteAsync(stringSerializer);

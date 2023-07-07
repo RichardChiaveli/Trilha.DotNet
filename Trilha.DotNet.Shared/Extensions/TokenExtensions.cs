@@ -2,7 +2,7 @@
 
 public static class TokenExtensions
 {
-    private static SigningCredentials CreateTokenSignature(this string tokenSigning)
+    public static SigningCredentials CreateTokenSignature(this string tokenSigning)
     {
         var symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigning));
         return new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha256Signature);

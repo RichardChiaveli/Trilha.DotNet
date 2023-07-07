@@ -2,7 +2,7 @@
 
 public static class RateLimiterResolver
 {
-    public static IServiceCollection AddRateLimiterSetup(this IServiceCollection services, int limit)
+    public static IServiceCollection AddGlobalRateLimiter(this IServiceCollection services, int limit)
     {
         services.AddRateLimiter(_ => _
             .AddFixedWindowLimiter("fixed", options =>
@@ -22,12 +22,5 @@ public static class RateLimiterResolver
             }));
 
         return services;
-    }
-
-    public static IApplicationBuilder UseRateLimiterSetup(this IApplicationBuilder app)
-    {
-        app.UseRateLimiter();
-
-        return app;
     }
 }

@@ -1,22 +1,22 @@
 ﻿namespace Trilha.DotNet.Shared.Middlewares;
 
-public abstract class LogMiddleware
+public abstract class LogMiddleware : IMiddleware
 {
     private const int ReadChunkBufferLength = 4096;
     private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-    private readonly RequestDelegate _next;
-
-    protected LogMiddleware(RequestDelegate next)
+    protected LogMiddleware()
     {
-        _next = next;
         _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {
+            if (context.Request.Path == "/")
+                context.Response.Redirect("/swagger/index.html");
+
             var originalBody = context.Response.Body;
 
             context.Request.EnableBuffering();
@@ -25,8 +25,8 @@ public abstract class LogMiddleware
             context.Response.Body = newResponseBody;
 
             var requestString = await HandleRequestAsync(context, newResponseBody);
-
-            await _next(context);
+            
+            await next(context);
 
             newResponseBody.Seek(0, SeekOrigin.Begin);
             await newResponseBody.CopyToAsync(originalBody);
@@ -40,12 +40,10 @@ public abstract class LogMiddleware
         catch (Exception e)
         {
             await AddLogError(context, e);
-            await HandleExceptionAsync(context, e);
         }
     }
 
-    private static async Task<Dictionary<string, string>> HandleRequestAsync(
-        HttpContext context, Stream requestStream)
+    private static async Task<Dictionary<string, string>> HandleRequestAsync(HttpContext context, Stream requestStream)
     {
         var request = context.Request;
         var form = HandleRequestForm(request);
@@ -53,7 +51,7 @@ public abstract class LogMiddleware
 
         return new Dictionary<string, string>
         {
-            {"Schema", request.Scheme},
+            {"Scheme", request.Scheme},
             {"Host", request.Host.Value},
             {"Path", request.Path},
             {"QueryString", request.QueryString.Value ?? string.Empty},
@@ -85,40 +83,14 @@ public abstract class LogMiddleware
         return new Dictionary<string, string>
         {
             {"StatusCode", response.StatusCode.ToString()},
-            {"Schema", request.Scheme},
+            {"Scheme", request.Scheme},
             {"Host", request.Host.Value},
             {"Path", request.Path},
             {"QueryString", request.QueryString.Value ?? string.Empty},
             {"ResponseBody", ReadStreamInChunks(newResponseBody)}
         };
     }
-
-    private static async Task HandleExceptionAsync(HttpContext context, Exception e)
-    {
-        var jsonResult = new JsonResult(new
-        {
-            Error = HandleFormatException(e)
-        })
-        {
-            StatusCode = (int)HttpStatusCode.InternalServerError
-        };
-
-        var routeData = context.GetRouteData();
-        var actionDescriptor = new ActionDescriptor();
-        var actionContext = new ActionContext(context, routeData, actionDescriptor);
-
-        jsonResult.ContentType = "application/problem+json";
-
-        await jsonResult.ExecuteResultAsync(actionContext);
-    }
-
-    private static string HandleFormatException(Exception e) =>
-        e switch
-        {
-            StatusCodeException degustOneException => degustOneException.Message,
-            _ => "Ops! Algo deu errado."
-        };
-
+    
     private static string ReadStreamInChunks(Stream stream)
     {
         stream.Seek(0, SeekOrigin.Begin);

@@ -32,7 +32,7 @@ public static class JsonResolver
         }
     }
 
-    public static IServiceCollection AddJsonMvc(this IServiceCollection services)
+    public static IServiceCollection AddJson(this IServiceCollection services)
     {
         services
             .AddControllers(opt =>

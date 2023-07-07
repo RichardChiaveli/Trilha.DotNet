@@ -1,9 +1,5 @@
 ﻿namespace Trilha.DotNet.Shared.Extensions;
 
-/// <summary>
-/// IMPORTANT:
-///     services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
-/// </summary>
 public static class PdfExtensions
 {
     public static byte[] SerializePdf(
