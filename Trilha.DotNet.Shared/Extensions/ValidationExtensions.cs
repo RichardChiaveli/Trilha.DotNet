@@ -108,4 +108,17 @@ public static class ValidationExtensions
         digito += resto.ToString();
         return cpf.EndsWith(digito);
     }
+
+    public static bool IsEmail(this string email)
+    {
+        try
+        {
+            _ = new MailAddress(email);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

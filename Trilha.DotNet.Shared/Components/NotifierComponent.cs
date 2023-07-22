@@ -12,7 +12,7 @@ public class NotifierComponent
             Errors = Messages
         };
 
-        Messages.Clear();
+        Messages = new List<string>();
 
         return result;
     }
