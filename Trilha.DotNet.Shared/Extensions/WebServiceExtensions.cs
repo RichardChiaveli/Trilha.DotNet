@@ -271,7 +271,7 @@ public static class WebServiceExtensions
         return fileContent;
     }
 
-    public static FormUrlEncodedContent FromUrlEncoded(this Dictionary<string, string> fromUrlEncoded) => new(fromUrlEncoded);
+    public static FormUrlEncodedContent FromFormUrlEncoded(this Dictionary<string, string> fromUrlEncoded) => new(fromUrlEncoded);
 
     public static Dictionary<string, string> FromHeader(this IHeaderDictionary dictionary) =>
         dictionary.Where(i => !string.IsNullOrWhiteSpace(i.Value))
