@@ -102,4 +102,35 @@ public static class SecurityExtensions
 
         return Convert.ToBase64String(b);
     }
+
+    public static string ToRot18(this string input)
+    {
+        const string plainText = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const string cipherText = "NOPQRSTUVWXYZABCDEFGHIJKLM5678901234";
+
+        var map = new Dictionary<char, char>();
+
+        for (var i = 0; i < plainText.Length; i++)
+        {
+            map.Add(plainText[i], cipherText[i]);
+        }
+
+        var newString = new StringBuilder();
+
+        foreach (var c in input)
+        {
+            var upperC = char.ToUpperInvariant(c);
+
+            if (map.TryGetValue(upperC, out var value))
+            {
+                newString.Append(char.IsLower(c) ? char.ToLowerInvariant(value) : value);
+            }
+            else
+            {
+                newString.Append(c);
+            }
+        }
+
+        return newString.ToString();
+    }
 }
