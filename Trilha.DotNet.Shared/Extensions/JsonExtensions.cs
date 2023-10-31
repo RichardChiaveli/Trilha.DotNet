@@ -15,7 +15,7 @@ public static class JsonExtensions
 
     public static string Stringify(this object obj)
         => JsonConvert.SerializeObject(obj, new JsonSerializerSettings().AddDefaultSettings());
-    
+
     public static T ParseJson<T>(this string json)
         => JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings().AddDefaultSettings())!;
 

@@ -36,7 +36,7 @@ public abstract class EntityFrameworkRepository
 
     public async Task<TEntity> Get<TEntity>(object id) where TEntity : class
         => (await _context.Set<TEntity>().FindAsync(id))!;
-        
+
     public async Task<bool> Create<TEntity>(params TEntity[] entities) where TEntity : class
     {
         await _context.Set<TEntity>().AddRangeAsync(entities);
@@ -56,7 +56,7 @@ public abstract class EntityFrameworkRepository
         var result = await GetBy(arguments, false).ExecuteUpdateAsync(set);
         return result > 0;
     }
-        
+
     public async Task<bool> Delete<TEntity>(object id) where TEntity : class
     {
         var entity = await Get<TEntity>(id);

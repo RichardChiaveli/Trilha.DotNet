@@ -9,7 +9,7 @@ public static class ValidationExtensions
 
         var validationResult = validator!.Validate(obj);
 
-        return !validationResult.IsValid ? 
+        return !validationResult.IsValid ?
             validationResult.Errors.Select(s => s.ErrorMessage) : Array.Empty<string>();
     }
 

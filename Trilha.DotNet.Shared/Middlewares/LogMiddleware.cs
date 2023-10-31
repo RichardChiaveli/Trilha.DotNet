@@ -59,7 +59,7 @@ public abstract class LogMiddleware : IMiddleware
         }
 
         await AddRequestLog(context, request);
-        
+
         await _next(context);
 
         var response = new Dictionary<string, string>();
@@ -67,16 +67,16 @@ public abstract class LogMiddleware : IMiddleware
         responseBodyStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(responseBodyStream).ReadToEndAsync();
         response["Body"] = responseBody;
-        
+
         responseBodyStream.Seek(0, SeekOrigin.Begin);
         await responseBodyStream.CopyToAsync(originalBodyStream);
 
         var ipAddress = context.Connection.RemoteIpAddress?.ToString();
         response["IpAddress"] = ipAddress ?? string.Empty;
-        
+
         stopwatch.Stop();
         var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-        
+
         response["ElapsedMilliseconds"] = elapsedMilliseconds.ToString();
         response["StatusCode"] = context.Response.StatusCode.ToString();
 

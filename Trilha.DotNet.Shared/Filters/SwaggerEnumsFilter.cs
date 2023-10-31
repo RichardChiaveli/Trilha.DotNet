@@ -34,7 +34,7 @@ public class SwaggerEnumsFilter : IDocumentFilter
             }
         }
     }
-    
+
     private static string DescribeEnum(IEnumerable<IOpenApiAny> enums, string proprtyTypeName)
     {
         var enumDescriptions = new List<string>();

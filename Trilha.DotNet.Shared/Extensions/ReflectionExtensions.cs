@@ -31,7 +31,7 @@ public static class ReflectionExtensions
         var classe = method.ReflectedType?.Name;
         return $"{classe}.{string.Format(msg.ToString(), namevalues)}";
     }
-    
+
     public static PropertyInfo GetAttributeFromAnnotattion<T>(this Type type, string columnName, string propName = "Name") where T : Attribute
     {
         return type.GetProperties().First(prop =>

@@ -28,7 +28,7 @@ public abstract class DapperRepository
         using var conn = Connection;
         return await conn.ExecuteReaderAsync(query, arguments, transaction, 0, commandType);
     }
-        
+
     public async Task<T> GetValue<T>(string query,
         object? arguments = null, CommandType commandType = CommandType.Text, IDbTransaction? transaction = null)
     {
