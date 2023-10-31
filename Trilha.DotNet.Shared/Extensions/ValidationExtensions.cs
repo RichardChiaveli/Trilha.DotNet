@@ -7,11 +7,10 @@ public static class ValidationExtensions
     {
         var validator = Activator.CreateInstance(typeof(TAbstractValidator)) as TAbstractValidator;
 
-        var validationResult = validator?.Validate(obj);
-        var isValid = validationResult?.IsValid ?? true;
+        var validationResult = validator!.Validate(obj);
 
-        return (isValid ? Array.Empty<string>() :
-            validationResult?.Errors.Select(s => s.ErrorMessage)) ?? Array.Empty<string>();
+        return !validationResult.IsValid ? 
+            validationResult.Errors.Select(s => s.ErrorMessage) : Array.Empty<string>();
     }
 
     public static bool IsCnpj(this string cnpj)

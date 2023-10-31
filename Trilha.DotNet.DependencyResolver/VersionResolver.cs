@@ -10,12 +10,13 @@ public static class VersionResolver
             options.DefaultApiVersion = new ApiVersion(1, 0);
             options.ReportApiVersions = true;
         })
-        .AddVersionedApiExplorer(options =>
+        .AddApiExplorer(options =>
         {
             options.GroupNameFormat = "'v'V";
             options.SubstituteApiVersionInUrl = true;
-        })
-        .Configure<ApiBehaviorOptions>(options =>
+        });
+
+        services.Configure<ApiBehaviorOptions>(options =>
         {
             options.SuppressModelStateInvalidFilter = true;
         });

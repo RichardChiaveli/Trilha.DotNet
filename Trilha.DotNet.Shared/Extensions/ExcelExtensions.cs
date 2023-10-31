@@ -58,7 +58,7 @@ public static class ExcelExtensions
 
         for (var i = 0; i < convertedList.Count; i++)
         {
-            if (convertedList[i].ItemArray.All(field => string.IsNullOrWhiteSpace(field?.ToString())))
+            if (Array.TrueForAll(convertedList[i].ItemArray, field => string.IsNullOrWhiteSpace(field?.ToString())))
             {
                 convertedList.RemoveAt(i);
             }

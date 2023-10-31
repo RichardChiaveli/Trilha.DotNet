@@ -2,115 +2,87 @@
 
 public abstract class LogMiddleware : IMiddleware
 {
-    private const int ReadChunkBufferLength = 4096;
-    private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
+    private readonly RequestDelegate _next;
 
-    protected LogMiddleware()
+    protected LogMiddleware(RequestDelegate next)
     {
-        _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
+        _next = next;
     }
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        try
+        var stopwatch = Stopwatch.StartNew();
+
+        context.Request.EnableBuffering();
+
+        var originalBodyStream = context.Response.Body;
+
+        using var responseBodyStream = new MemoryStream();
+        context.Response.Body = responseBodyStream;
+
+        var request = new Dictionary<string, string>
         {
-            if (context.Request.Path == "/")
-                context.Response.Redirect("/swagger/index.html");
-
-            var originalBody = context.Response.Body;
-
-            context.Request.EnableBuffering();
-
-            await using var newResponseBody = _recyclableMemoryStreamManager.GetStream();
-            context.Response.Body = newResponseBody;
-
-            var requestString = await HandleRequestAsync(context, newResponseBody);
-            
-            await next(context);
-
-            newResponseBody.Seek(0, SeekOrigin.Begin);
-            await newResponseBody.CopyToAsync(originalBody);
-
-            newResponseBody.Seek(0, SeekOrigin.Begin);
-
-            var responseString = HandleResponse(context, newResponseBody);
-
-            await AddLogInfo(context, requestString, responseString);
-        }
-        catch (Exception e)
-        {
-            await AddLogError(context, e);
-        }
-    }
-
-    private static async Task<Dictionary<string, string>> HandleRequestAsync(HttpContext context, Stream requestStream)
-    {
-        var request = context.Request;
-        var form = HandleRequestForm(request);
-        var body = await HandleRequestBodyAsync(request, requestStream);
-
-        return new Dictionary<string, string>
-        {
-            {"Scheme", request.Scheme},
-            {"Host", request.Host.Value},
-            {"Path", request.Path},
-            {"QueryString", request.QueryString.Value ?? string.Empty},
-            {"RequestForm", form},
-            {"RequestBody", body}
+            {"Method", context.Request.Method},
+            {"Url",$"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}{context.Request.QueryString}"},
+            {"QueryString", context.Request.QueryString.ToString()}
         };
-    }
 
-    private static async Task<string> HandleRequestBodyAsync(HttpRequest request, Stream requestStream)
-    {
-        await request.Body.CopyToAsync(requestStream);
-        request.Body.Seek(0, SeekOrigin.Begin);
-        return ReadStreamInChunks(requestStream);
-    }
-
-    private static string HandleRequestForm(HttpRequest request)
-    {
-        if (request.ContentType?.Contains("multipart/form-data") ?? false)
-            return request.Form.Keys.ToDictionary(k => k, v => request.Form[v].ToString()).Stringify();
-
-        return string.Empty;
-    }
-
-    private static Dictionary<string, string> HandleResponse(HttpContext context, Stream newResponseBody)
-    {
-        var request = context.Request;
-        var response = context.Response;
-
-        return new Dictionary<string, string>
+        if (context.Request.Headers.Any())
         {
-            {"StatusCode", response.StatusCode.ToString()},
-            {"Scheme", request.Scheme},
-            {"Host", request.Host.Value},
-            {"Path", request.Path},
-            {"QueryString", request.QueryString.Value ?? string.Empty},
-            {"ResponseBody", ReadStreamInChunks(newResponseBody)}
-        };
-    }
-    
-    private static string ReadStreamInChunks(Stream stream)
-    {
-        stream.Seek(0, SeekOrigin.Begin);
-        using var textWriter = new StringWriter();
-        using var reader = new StreamReader(stream);
-        var readChunk = new char[ReadChunkBufferLength];
-        int readChunkLength;
+            var headers = context.Request.Headers.ToDictionary(header =>
+                header.Key, header => header.Value.ToString());
 
-        do
+            request["Headers"] = headers.Stringify();
+        }
+
+        if (context.Request.HasFormContentType)
         {
-            readChunkLength = reader.ReadBlock(readChunk, 0, ReadChunkBufferLength);
-            textWriter.Write(readChunk, 0, readChunkLength);
-        } while (readChunkLength > 0);
+            var form = await context.Request.ReadFormAsync();
 
-        var result = textWriter.ToString();
+            var formData = form.ToDictionary(field =>
+                field.Key, field => field.Value.ToString());
 
-        return result;
+            request["FormData"] = formData.Stringify();
+        }
+
+        using (var reader = new StreamReader(context.Request.Body, leaveOpen: true))
+        {
+            var body = await reader.ReadToEndAsync();
+            body = body.Replace("\r\n", "").Replace("\n", "").Replace(" ", "");
+
+            if (!string.IsNullOrWhiteSpace(body))
+            {
+                request["Body"] = body;
+            }
+
+            context.Request.Body.Seek(0, SeekOrigin.Begin);
+        }
+
+        await AddRequestLog(context, request);
+        
+        await _next(context);
+
+        var response = new Dictionary<string, string>();
+
+        responseBodyStream.Seek(0, SeekOrigin.Begin);
+        var responseBody = await new StreamReader(responseBodyStream).ReadToEndAsync();
+        response["Body"] = responseBody;
+        
+        responseBodyStream.Seek(0, SeekOrigin.Begin);
+        await responseBodyStream.CopyToAsync(originalBodyStream);
+
+        var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+        response["IpAddress"] = ipAddress ?? string.Empty;
+        
+        stopwatch.Stop();
+        var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+        
+        response["ElapsedMilliseconds"] = elapsedMilliseconds.ToString();
+        response["StatusCode"] = context.Response.StatusCode.ToString();
+
+        await AddResponsetLog(context, response);
     }
 
-    public abstract Task AddLogInfo(HttpContext context, Dictionary<string, string> request, Dictionary<string, string> response);
-
-    public abstract Task AddLogError(HttpContext context, Exception e);
+    public abstract Task AddRequestLog(HttpContext context, Dictionary<string, string> args);
+    public abstract Task AddResponsetLog(HttpContext context, Dictionary<string, string> args);
 }

@@ -129,6 +129,6 @@ public static class TokenExtensions
 
         var authenticationString = base64EncodedBytes.Split(":");
 
-        return new KeyValuePair<string, string>(authenticationString.First(), authenticationString.Last());
+        return new KeyValuePair<string, string>(authenticationString[0], authenticationString[^1]);
     }
 }

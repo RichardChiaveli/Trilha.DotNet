@@ -2,13 +2,13 @@
 
 public static class DateTimeExtensions
 {
-    public static DateTime ToFirstDate(this DateTime value) => new(value.Year, value.Month, 1);
+    public static DateTime ToFirstDate(this DateTime value) => new(value.Year, value.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public static DateTime ToLastDate(this DateTime value) => new(value.Year, value.Month,
-        DateTime.DaysInMonth(value.Year, value.Month));
+        DateTime.DaysInMonth(value.Year, value.Month), 0, 0, 0, DateTimeKind.Utc);
 
     public static long ToUnixEpochDate(this DateTime date)
-        => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
+        => (long)Math.Round((date.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds);
 
     public static bool Validate(this string format, string intialDate, string finalDate)
     {

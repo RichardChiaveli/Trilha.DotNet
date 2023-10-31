@@ -121,11 +121,17 @@ public class FileTransferProtocolClient : IDisposable
         return this;
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposing) return;
+        _client?.Disconnect();
+        _client?.Dispose();
+    }
+
+
     public void Dispose()
     {
-        _client?.Disconnect();
-
-        if (!_client?.IsDisposed ?? false)
-            _client?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

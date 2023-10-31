@@ -31,11 +31,10 @@ public static class ReflectionExtensions
         var classe = method.ReflectedType?.Name;
         return $"{classe}.{string.Format(msg.ToString(), namevalues)}";
     }
-
-    public static PropertyInfo? GetAttributeFromAnnotattion<T>(this Type type, string columnName, string propName = "Name") where T : Attribute
+    
+    public static PropertyInfo GetAttributeFromAnnotattion<T>(this Type type, string columnName, string propName = "Name") where T : Attribute
     {
-        return type.GetProperties()
-            .FirstOrDefault(prop =>
+        return type.GetProperties().First(prop =>
             {
                 var attribute = prop.GetCustomAttribute(typeof(T), false) as T;
                 var value = attribute?.GetType().GetProperty(propName)?.GetValue(attribute, null)?.ToString() ?? prop.Name;
