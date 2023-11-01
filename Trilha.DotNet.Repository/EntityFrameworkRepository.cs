@@ -1,20 +1,20 @@
 ﻿namespace Trilha.DotNet.Repository;
 
-public abstract class EntityFrameworkRepository
+public class EntityFrameworkRepository<TContext> where TContext : DbContext
 {
-    private readonly DbContext _context;
-    public readonly IDbConnection Connection;
+    private readonly TContext _context;
 
-    protected EntityFrameworkRepository(DbContext context)
+    protected EntityFrameworkRepository(TContext context)
     {
         _context = context;
-        Connection = context.Database.GetDbConnection();
     }
 
-    public IQueryable<TEntity> GetBy<TEntity>(Expression<Func<TEntity, bool>> arguments, bool asNoTracking = true,
-        params Expression<Func<TEntity, object>>[] includes) where TEntity : class
+    public IQueryable<T> GetBy<T>(
+        Expression<Func<T, bool>> arguments
+        , bool asNoTracking = true
+        , params Expression<Func<T, object>>[] includes) where T : class
     {
-        IQueryable<TEntity> query = _context.Set<TEntity>();
+        IQueryable<T> query = _context.Set<T>();
 
         if (includes.HasProperties())
         {
@@ -34,41 +34,46 @@ public abstract class EntityFrameworkRepository
         return query;
     }
 
-    public async Task<TEntity> Get<TEntity>(object id) where TEntity : class
-        => (await _context.Set<TEntity>().FindAsync(id))!;
+    public async Task<T> Get<T>(object id) where T : class
+        => (await _context.Set<T>().FindAsync(id))!;
 
-    public async Task<bool> Create<TEntity>(params TEntity[] entities) where TEntity : class
+    public async Task<bool> Add<T>(params T[] entities) where T : class
     {
-        await _context.Set<TEntity>().AddRangeAsync(entities);
+        await _context.Set<T>().AddRangeAsync(entities);
         var result = await _context.SaveChangesAsync();
         return result > 0;
     }
 
-    public async Task<TEntity> Update<TEntity>(TEntity entity) where TEntity : class
+    public async Task<T> Update<T>(T entity) where T : class
     {
-        var model = _context.Set<TEntity>().Update(entity);
+        var model = _context.Set<T>().Update(entity);
         await _context.SaveChangesAsync();
         return model.Entity;
     }
 
-    public async Task<bool> Update<TEntity>(Expression<Func<TEntity, bool>> arguments, Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> set) where TEntity : class
+    public async Task<bool> Update<T>(
+        Expression<Func<T, bool>> arguments
+        , Expression<Func<SetPropertyCalls<T>
+        , SetPropertyCalls<T>>> set) where T : class
     {
         var result = await GetBy(arguments, false).ExecuteUpdateAsync(set);
         return result > 0;
     }
 
-    public async Task<bool> Delete<TEntity>(object id) where TEntity : class
+    public async Task<bool> Delete<T>(object id) where T : class
     {
-        var entity = await Get<TEntity>(id);
+        var entity = await Get<T>(id);
 
         if (entity == null)
             throw new ArgumentNullException(nameof(id));
 
-        _context.Set<TEntity>().Remove(entity);
+        _context.Set<T>().Remove(entity);
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> Delete<TEntity>(Expression<Func<TEntity, bool>> where, params Expression<Func<TEntity, object>>[] includes) where TEntity : class
+    public async Task<bool> Delete<T>(
+        Expression<Func<T, bool>> where
+        , params Expression<Func<T, object>>[] includes) where T : class
     {
         var result = await GetBy(where, false, includes).ExecuteDeleteAsync();
         return result > 0;

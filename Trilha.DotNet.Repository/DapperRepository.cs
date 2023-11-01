@@ -2,44 +2,45 @@
 
 public abstract class DapperRepository
 {
-    public abstract IDbConnection Connection { get; }
+    public abstract IDbConnection GetDbConnection();
 
-    private static void Map<T>() where T : class
+    private static void Map<T>()
     {
         var typeClass = typeof(T);
 
+        if (!typeClass.IsClass) return;
         var map = new CustomPropertyTypeMap(typeClass, (type, columnName)
             => type.GetAttributeFromAnnotattion<ColumnAttribute>(columnName));
 
         SqlMapper.SetTypeMap(typeClass, map);
     }
 
-    public async Task<IEnumerable<TEntity>> GetBy<TEntity>(string query,
-        object? arguments = null, CommandType commandType = CommandType.Text, IDbTransaction? transaction = null) where TEntity : class
+    public async Task<IEnumerable<T>> GetBy<T>(string query
+        , object? arguments = null
+        , CommandType commandType = CommandType.Text
+        , IDbTransaction? transaction = null)
     {
-        Map<TEntity>();
-        using var conn = Connection;
-        return await conn.QueryAsync<TEntity>(query, arguments, transaction, 0, commandType);
+        Map<T>();
+
+        using var conn = GetDbConnection();
+        return await conn.QueryAsync<T>(query, arguments, transaction, 0, commandType);
     }
 
-    public async Task<IDataReader> GetBy(string query,
-        object? arguments = null, CommandType commandType = CommandType.Text, IDbTransaction? transaction = null)
+    public async Task<IDataReader> GetBy(string query
+        , object? arguments = null
+        , CommandType commandType = CommandType.Text
+        , IDbTransaction? transaction = null)
     {
-        using var conn = Connection;
+        using var conn = GetDbConnection();
         return await conn.ExecuteReaderAsync(query, arguments, transaction, 0, commandType);
     }
 
-    public async Task<T> GetValue<T>(string query,
-        object? arguments = null, CommandType commandType = CommandType.Text, IDbTransaction? transaction = null)
+    public async Task<bool> AddUpdateOrDelete(string query
+        , object? arguments = null
+        , CommandType commandType = CommandType.Text
+        , IDbTransaction? transaction = null)
     {
-        using var conn = Connection;
-        return (await conn.ExecuteScalarAsync<T>(query, arguments, transaction, 0, commandType))!;
-    }
-
-    public async Task<bool> CreateUpdateOrDelete(string query,
-        object? arguments = null, CommandType commandType = CommandType.Text, IDbTransaction? transaction = null)
-    {
-        using var conn = Connection;
+        using var conn = GetDbConnection();
         return await conn.ExecuteAsync(query, arguments, transaction, 0, commandType) > 0;
     }
 }
