@@ -2,7 +2,30 @@
 
 public abstract class DapperRepository
 {
-    public abstract IDbConnection GetDbConnection();
+    private readonly string _connectionString;
+    private readonly string _providerName;
+
+    protected DapperRepository(string connectionString, string providerName)
+    {
+        _connectionString = connectionString;
+        _providerName = providerName;
+    }
+
+    private IDbConnection GetDbConnection()
+    {
+        var dbFactory = DbProviderFactories.GetFactory(_providerName);
+
+        var conn = dbFactory.CreateConnection() ??
+                   throw new ArgumentException("Invalid provider name");
+
+        if (string.IsNullOrWhiteSpace(_connectionString))
+            throw new ArgumentException("Invalid connection string");
+
+        conn.ConnectionString = _connectionString;
+        conn.Open();
+
+        return conn;
+    }
 
     private static void Map<T>()
     {
