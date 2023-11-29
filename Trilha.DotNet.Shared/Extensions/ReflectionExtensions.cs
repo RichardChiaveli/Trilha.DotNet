@@ -13,7 +13,7 @@ public static class ReflectionExtensions
         var msg = new StringBuilder();
         msg.Append($"{method.Name}(");
 
-        if (values.Any())
+        if (values.Length > 0)
         {
             for (int i = 0, j = 0; i < parms.Length; i++, j += 2)
             {

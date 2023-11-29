@@ -29,13 +29,13 @@ public class FileTransferProtocolClient : IDisposable
 
     public FileTransferProtocolClient List(out List<string> files)
     {
-        files = new List<string>();
+        files = new();
         if (!_isConnected) return this;
 
         files = _client?.GetListing()?
             .Where(e => e.Type == FtpObjectType.File)
             .Select(i => i.FullName)
-            .ToList() ?? new List<string>();
+            .ToList() ?? new();
 
         return this;
     }

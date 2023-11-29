@@ -15,6 +15,15 @@ public static class AzureKeyVaultResolver
             clientBuilder.UseCredential(new ClientSecretCredential(tenantId, clientId, clientSecret));
         });
 
+        var secretClient = services.BuildServiceProvider().GetRequiredService<SecretClient>();
+        Pageable<SecretProperties> allSecrets = secretClient.GetPropertiesOfSecrets();
+
+        var secrets = allSecrets.Select(secretProperty =>
+                secretClient.GetSecret(secretProperty.Name))
+            .ToDictionary(response => response.Value.Name, response => response.Value.Value);
+
+        services.AddSingleton(secrets);
+
         return services;
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace Trilha.DotNet.Repository;
 
-public class EntityFrameworkRepository<TContext> where TContext : DbContext
+public sealed class EntityFrameworkRepository<TContext> where TContext : DbContext
 {
     private readonly TContext _context;
 
-    protected EntityFrameworkRepository(TContext context)
+    public EntityFrameworkRepository(TContext context)
     {
         _context = context;
     }
@@ -62,10 +62,7 @@ public class EntityFrameworkRepository<TContext> where TContext : DbContext
 
     public async Task<bool> Delete<T>(object id) where T : class
     {
-        var entity = await Get<T>(id);
-
-        if (entity == null)
-            throw new ArgumentNullException(nameof(id));
+        var entity = await Get<T>(id) ?? throw new ArgumentNullException(nameof(id));
 
         _context.Set<T>().Remove(entity);
         return await _context.SaveChangesAsync() > 0;

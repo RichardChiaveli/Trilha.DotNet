@@ -6,10 +6,9 @@ public static class EnumExtensions
     {
         var fi = enumerator.GetType().GetField(enumerator.ToString());
 
-        if (fi?.GetCustomAttributes(typeof(DescriptionAttribute), false) is DescriptionAttribute[] attributes && attributes.Any())
-            return attributes.FirstOrDefault()?.Description ?? string.Empty;
-
-        return enumerator.ToString();
+        return fi?.GetCustomAttributes(typeof(DescriptionAttribute), false) is DescriptionAttribute[] attributes && attributes.Any()
+            ? attributes.FirstOrDefault()?.Description ?? string.Empty
+            : enumerator.ToString();
     }
 
     public static T Deserialize<T>(this string status) where T : Enum

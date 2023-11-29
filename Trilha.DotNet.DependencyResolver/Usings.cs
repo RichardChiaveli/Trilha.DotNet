@@ -1,6 +1,8 @@
 ﻿global using Asp.Versioning;
 global using Asp.Versioning.ApiExplorer;
+global using Azure;
 global using Azure.Identity;
+global using Azure.Security.KeyVault.Secrets;
 global using DinkToPdf;
 global using DinkToPdf.Contracts;
 global using HealthChecks.UI.Client;

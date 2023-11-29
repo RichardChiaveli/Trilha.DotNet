@@ -2,22 +2,21 @@
 
 /// <summary>
 /// Example
-///     [ModelBinder(BinderType = typeof(UploadModelBinder))]
+///     [ModelBinder(BinderType = typeof(UploadModelComponent))]
 /// </summary>
 /// <typeparam name="TModel"></typeparam>
 public class UploadModelComponent<TModel> : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-            throw new ArgumentNullException(nameof(bindingContext));
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
-        var produtoImagemViewModel = bindingContext.ValueProvider.GetValue("Model").First()
+        var model = bindingContext.ValueProvider.GetValue("Model").First()
             .ParseJson<IFormFileJson<TModel>>();
 
-        produtoImagemViewModel.Upload = bindingContext.ActionContext.HttpContext.Request.Form.Files;
+        model.Upload = bindingContext.ActionContext.HttpContext.Request.Form.Files;
 
-        bindingContext.Result = ModelBindingResult.Success(produtoImagemViewModel);
+        bindingContext.Result = ModelBindingResult.Success(model);
         return Task.CompletedTask;
     }
 }

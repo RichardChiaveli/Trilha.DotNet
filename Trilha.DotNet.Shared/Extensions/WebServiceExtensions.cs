@@ -27,7 +27,7 @@ public static class WebServiceExtensions
             };
         }
 
-        if (!headers.Any()) return request;
+        if (headers.Length <= 0) return request;
 
         var contentList = new List<Type>
             {
@@ -83,7 +83,7 @@ public static class WebServiceExtensions
     {
         try
         {
-            fromForm ??= new MultipartFormDataContent();
+            fromForm ??= new();
 
             foreach (var file in files)
             {
@@ -221,10 +221,7 @@ public static class WebServiceExtensions
         using ObjectXml.XmlReader reader = new ObjectXml.XmlNodeReader(first);
         var serialize = serializer.Deserialize(reader);
 
-        if (serialize is T result)
-            return result;
-
-        return default!;
+        return serialize is T result ? result : default!;
     }
 
     public static T ResponseAsSoap<T>(this HttpResponseMessage response)

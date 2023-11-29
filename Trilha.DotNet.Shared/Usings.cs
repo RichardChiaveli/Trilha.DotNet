@@ -1,5 +1,7 @@
 ﻿global using Azure;
+global using Azure.Core.Pipeline;
 global using Azure.Messaging.ServiceBus;
+global using Azure.Storage;
 global using Azure.Storage.Blobs;
 global using Azure.Storage.Blobs.Models;
 global using ClosedXML.Excel;
@@ -34,7 +36,6 @@ global using System.Collections;
 global using System.ComponentModel;
 global using System.Data;
 global using System.Diagnostics;
-global using System.Dynamic;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.IO.Compression;

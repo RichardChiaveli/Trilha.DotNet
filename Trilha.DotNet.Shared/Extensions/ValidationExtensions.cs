@@ -38,10 +38,7 @@ public static class ValidationExtensions
 
         var resto = (soma % 11);
 
-        if (resto < 2)
-            resto = 0;
-        else
-            resto = 11 - resto;
+        resto = resto < 2 ? 0 : 11 - resto;
 
         var digito = resto.ToString();
         tempCnpj += digito;
@@ -52,10 +49,7 @@ public static class ValidationExtensions
 
         resto = soma % 11;
 
-        if (resto < 2)
-            resto = 0;
-        else
-            resto = 11 - resto;
+        resto = resto < 2 ? 0 : 11 - resto;
 
         digito += resto.ToString();
         return cnpj.EndsWith(digito);
@@ -85,10 +79,7 @@ public static class ValidationExtensions
 
         var resto = soma % 11;
 
-        if (resto < 2)
-            resto = 0;
-        else
-            resto = 11 - resto;
+        resto = resto < 2 ? 0 : 11 - resto;
 
         var digito = resto.ToString();
         tempCpf += digito;
@@ -99,10 +90,7 @@ public static class ValidationExtensions
 
         resto = soma % 11;
 
-        if (resto < 2)
-            resto = 0;
-        else
-            resto = 11 - resto;
+        resto = resto < 2 ? 0 : 11 - resto;
 
         digito += resto.ToString();
         return cpf.EndsWith(digito);

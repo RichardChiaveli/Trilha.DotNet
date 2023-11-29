@@ -4,26 +4,19 @@ public class NotifierComponent
 {
     public List<string> Messages { get; set; } = new();
 
-    private object ShowMessages()
+    public ApiResponse<T> Result<T>(T data)
     {
-        var result = new
+        if (Messages.Count > 0)
+            return new ApiResponse<T>
+            {
+                Errors = Messages,
+                Status = Messages.Count > 0
+            };
+
+        var result = new ApiResponse<T>
         {
-            Status = false,
-            Errors = Messages
+            Status = true
         };
-
-        Messages = new List<string>();
-
-        return result;
-    }
-
-    public object Result<T>(T? data = default)
-    {
-        if (Messages.Any())
-            return ShowMessages();
-
-        dynamic result = new ExpandoObject();
-        result.Status = true;
 
         if (data != null)
             result.Data = data;
@@ -31,20 +24,23 @@ public class NotifierComponent
         return result;
     }
 
-    public object Result<T>(IEnumerable<T> data, int pageIndex, int pageSize, int totalPages, int totalItems)
+    public ApiResponse<List<T>> Result<T>(List<T> data, int pageIndex, int pageSize, int totalPages, int totalItems)
     {
-        if (Messages.Any())
-            return ShowMessages();
-
-        return new
-        {
-            Status = true,
-            PageIndex = pageIndex,
-            PageSize = pageSize,
-            LastPage = pageIndex == pageSize,
-            TotalPages = totalPages,
-            TotalItems = totalItems,
-            Data = data
-        };
+        return Messages.Count > 0
+            ? new ApiResponse<List<T>>
+            {
+                Errors = Messages,
+                Status = Messages.Count > 0
+            }
+            : new ApiResponse<List<T>>
+            {
+                Status = true,
+                LastPage = pageIndex == pageSize,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                Data = data
+            };
     }
 }

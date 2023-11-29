@@ -32,7 +32,7 @@ public static class ExceptionHandlerResolver
                         json.Detail = error;
                     }
 
-                    string stringSerializer = JsonConvert.SerializeObject(json);
+                    var stringSerializer = ((object)json).Stringify();
                     await context.Response.WriteAsync(stringSerializer);
                 }
             });

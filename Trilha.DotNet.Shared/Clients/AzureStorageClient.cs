@@ -6,40 +6,48 @@ public sealed class AzureStorageClient
 
     public AzureStorageClient(string key, string blobContainerName)
     {
-        var client = new BlobServiceClient(key);
+        BlobClientOptions blobOptions = new()
+        {
+            Transport = new HttpClientTransport(new HttpClient
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            }),
+            Retry =
+            {
+                NetworkTimeout = Timeout.InfiniteTimeSpan
+            }
+        };
+
+        var client = new BlobServiceClient(key, blobOptions);
+
         _blobContainerClient = client.GetBlobContainerClient(blobContainerName);
     }
 
     public async Task<BlobDownloadInfo> DownloadAsync(string blobName)
         => await _blobContainerClient.GetBlobClient(blobName).DownloadAsync().ConfigureAwait(false);
 
-    public async Task<int> AddOrUpdateAsync(string blobName, Stream data)
+    public async Task<int> AddOrUpdateAsync(IFormFile file)
     {
+        BlobUploadOptions upOptions = new()
+        {
+            TransferOptions = new StorageTransferOptions
+            {
+                MaximumTransferSize = long.MaxValue,
+                InitialTransferSize = long.MaxValue,
+                InitialTransferLength = int.MaxValue,
+                MaximumConcurrency = int.MaxValue,
+                MaximumTransferLength = int.MaxValue
+            },
+            HttpHeaders = new BlobHttpHeaders
+            {
+                ContentType = file.ContentType
+            }
+        };
+
         var result =
-            await _blobContainerClient.GetBlobClient(blobName).UploadAsync(data,
-                new BlobHttpHeaders
-                {
-                    ContentType = blobName.GetContentType()
-                }).ConfigureAwait(false);
+            await _blobContainerClient.GetBlobClient(file.FileName).UploadAsync(file.OpenReadStream(), upOptions).ConfigureAwait(false);
 
         return result.GetRawResponse().Status;
-    }
-
-    public async Task<int> AddOrUpdateAsync(IFormFile file)
-        => await AddOrUpdateAsync(file.FileName, file.OpenReadStream());
-
-    public Task AddOrUpdateRangeAsync(Dictionary<string, Stream> arg)
-    {
-        var poolTasks = new List<Task>();
-
-        foreach (var (key, value) in arg)
-        {
-            poolTasks.Add(AddOrUpdateAsync(key, value));
-        }
-
-        poolTasks.PromisseAllAsync();
-
-        return Task.CompletedTask;
     }
 
     public async Task<bool> DeleteAsync(string blobName) =>
